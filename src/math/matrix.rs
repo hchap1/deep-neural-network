@@ -17,6 +17,12 @@ impl<T: Copy + Clone + Default, const M: usize, const N: usize> Matrix<T, M, N> 
             data: data.map(|x| x.into())
         }
     }
+
+    /// Retrieve the index of a specific row and column
+    #[inline]
+    fn idx(row: usize, col: usize) -> usize {
+        row * N + col
+    }
 }
 
 impl<const M: usize> Matrix<f64, M, M> where [(); M * M]: {
@@ -86,6 +92,52 @@ where [(); M * N]:, [(); M * P]:, [(); N * P]:, T: std::ops::Mul<Output = T> + s
                 (0..N).map(|val| self.data[row * N + val] * other.data[val * P + col])
                     .sum()
             })
+        }
+    }
+}
+
+impl<T, const M: usize, const N: usize> std::ops::Add<Matrix<T, M, N>> for Matrix<T, M, N>
+where [(); M * N]:, T: std::ops::Add<Output = T> + Copy
+{
+    type Output = Matrix<T, M, N>;
+
+    fn add(self, other: Matrix<T, M, N>) -> Matrix<T, M, N> {
+        Matrix {
+            data: std::array::from_fn(|idx| self.data[idx] + other.data[idx])
+        }
+    }
+}
+
+impl<T, const M: usize, const N: usize> std::ops::Sub<Matrix<T, M, N>> for Matrix<T, M, N>
+where [(); M * N]:, T: std::ops::Sub<Output = T> + Copy
+{
+    type Output = Matrix<T, M, N>;
+
+    fn sub(self, other: Matrix<T, M, N>) -> Matrix<T, M, N> {
+        Matrix {
+            data: std::array::from_fn(|idx| self.data[idx] - other.data[idx])
+        }
+    }
+}
+
+impl<T, V, const M: usize, const N: usize> std::ops::Mul<V> for Matrix<T, M, N>
+where T: From<V> + std::ops::Mul<Output = T>, [(); M * N]:, V: Copy {
+    type Output = Matrix<T, M, N>;
+
+    fn mul(self, other: V) -> Matrix<T, M, N> {
+        Matrix {
+            data: self.data.map(|x| x * other.into())
+        }
+    }
+}
+
+impl<T, V, const M: usize, const N: usize> std::ops::Div<V> for Matrix<T, M, N>
+where T: From<V> + std::ops::Div<Output = T>, [(); M * N]:, V: Copy {
+    type Output = Matrix<T, M, N>;
+
+    fn div(self, other: V) -> Matrix<T, M, N> {
+        Matrix {
+            data: self.data.map(|x| x / other.into())
         }
     }
 }
