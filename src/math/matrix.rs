@@ -10,6 +10,13 @@ impl<T: Copy + Clone + Default, const M: usize, const N: usize> Matrix<T, M, N> 
             data: [T::default(); M * N]
         }
     }
+
+    /// Construct from flat array based on generics
+    pub fn build<A>(data: [A; M * N]) -> Matrix<T, M, N> where T: From<A> {
+        Matrix {
+            data: data.map(|x| x.into())
+        }
+    }
 }
 
 impl<const M: usize> Matrix<f64, M, M> where [(); M * M]: {
@@ -27,6 +34,31 @@ impl<const M: usize> Matrix<f64, M, M> where [(); M * M]: {
         Self {
             data
         }
+    }
+}
+
+impl<T: std::fmt::Debug, const M: usize, const N: usize> std::fmt::Debug
+    for Matrix<T, M, N>
+where
+    [(); M * N]:,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Matrix<{}, {}> [", M, N)?;
+
+        for r in 0..M {
+            write!(f, "    [")?;
+            for c in 0..N {
+                let idx = r * N + c;
+                write!(f, "{:?}", self.data[idx])?;
+
+                if c < N - 1 {
+                    write!(f, ", ")?;
+                }
+            }
+            writeln!(f, "]")?;
+        }
+
+        write!(f, "]")
     }
 }
 
