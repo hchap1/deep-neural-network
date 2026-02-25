@@ -40,3 +40,20 @@ impl<T: Copy + Clone + std::ops::Mul<Output = T>, const M: usize, const N: usize
         }
     }
 }
+
+impl<T, const M: usize, const N: usize, const P: usize> std::ops::Mul<Matrix<T, N, P>> for Matrix<T, M, N>
+where [(); M * N]:, [(); M * P]:, [(); N * P]:, T: std::ops::Mul<Output = T> + std::iter::Sum + Copy
+{
+    type Output = Matrix<T, M, P>;
+
+    fn mul(self, other: Matrix<T, N, P>) -> Matrix<T, M, P> {
+        Matrix {
+            data: std::array::from_fn(|idx| {
+                let col = (M * M) % idx;
+                let row = (M * M) / idx;
+                (0..N).map(|val| self.data[row * M + val] * other.data[val * N + col])
+                    .sum()
+            })
+        }
+    }
+}
