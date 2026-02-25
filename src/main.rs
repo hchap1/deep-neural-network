@@ -18,4 +18,6 @@ fn main() {
     ]);
 
     println!("AxB =\n{:?}", a * b);
+
+    println!("IDENTITY:\n{:?}", Matrix::<f64, 5, 5>::identity());
 }

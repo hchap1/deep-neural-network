@@ -25,8 +25,10 @@ impl<const M: usize> Matrix<f64, M, M> where [(); M * M]: {
     pub fn identity() -> Self {
 
         let data = std::array::from_fn(|idx| {
-            let col = (M * M) % idx;
-            let row = (M * M) / idx;
+            let col = idx % M;
+            let row = idx / M;
+
+            println!("COL/ROW: {col}, {row}");
 
             if col == row { 1f64 } else { 0f64 }
         });
@@ -81,9 +83,9 @@ where [(); M * N]:, [(); M * P]:, [(); N * P]:, T: std::ops::Mul<Output = T> + s
     fn mul(self, other: Matrix<T, N, P>) -> Matrix<T, M, P> {
         Matrix {
             data: std::array::from_fn(|idx| {
-                let col = (M * M) % idx;
-                let row = (M * M) / idx;
-                (0..N).map(|val| self.data[row * M + val] * other.data[val * N + col])
+                let row = idx / P;
+                let col = idx % P;
+                (0..N).map(|val| self.data[row * N + val] * other.data[val * P + col])
                     .sum()
             })
         }
