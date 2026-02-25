@@ -28,8 +28,6 @@ impl<const M: usize> Matrix<f64, M, M> where [(); M * M]: {
             let col = idx % M;
             let row = idx / M;
 
-            println!("COL/ROW: {col}, {row}");
-
             if col == row { 1f64 } else { 0f64 }
         });
 
