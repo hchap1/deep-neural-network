@@ -1,5 +1,5 @@
 pub struct Matrix<T, const M: usize, const N: usize> where [(); M * N]: {
-    data: [T; M * N]
+    pub data: [T; M * N]
 }
 
 impl<T: Copy + Clone + Default, const M: usize, const N: usize> Matrix<T, M, N> where [(); M * N]: {
@@ -79,6 +79,23 @@ impl<T: Copy + Clone + std::ops::Mul<Output = T>, const M: usize, const N: usize
     }
 }
 
+impl<T, const M: usize, const N: usize, const P: usize> std::ops::Mul<Matrix<T, N, P>> for &Matrix<T, M, N>
+where [(); M * N]:, [(); M * P]:, [(); N * P]:, T: std::ops::Mul<Output = T> + std::iter::Sum + Copy
+{
+    type Output = Matrix<T, M, P>;
+
+    fn mul(self, other: Matrix<T, N, P>) -> Matrix<T, M, P> {
+        Matrix {
+            data: std::array::from_fn(|idx| {
+                let row = idx / P;
+                let col = idx % P;
+                (0..N).map(|val| self.data[row * N + val] * other.data[val * P + col])
+                    .sum()
+            })
+        }
+    }
+}
+
 impl<T, const M: usize, const N: usize, const P: usize> std::ops::Mul<Matrix<T, N, P>> for Matrix<T, M, N>
 where [(); M * N]:, [(); M * P]:, [(); N * P]:, T: std::ops::Mul<Output = T> + std::iter::Sum + Copy
 {
@@ -97,6 +114,18 @@ where [(); M * N]:, [(); M * P]:, [(); N * P]:, T: std::ops::Mul<Output = T> + s
 }
 
 impl<T, const M: usize, const N: usize> std::ops::Add<Matrix<T, M, N>> for Matrix<T, M, N>
+where [(); M * N]:, T: std::ops::Add<Output = T> + Copy
+{
+    type Output = Matrix<T, M, N>;
+
+    fn add(self, other: Matrix<T, M, N>) -> Matrix<T, M, N> {
+        Matrix {
+            data: std::array::from_fn(|idx| self.data[idx] + other.data[idx])
+        }
+    }
+}
+
+impl<T, const M: usize, const N: usize> std::ops::Add<Matrix<T, M, N>> for &Matrix<T, M, N>
 where [(); M * N]:, T: std::ops::Add<Output = T> + Copy
 {
     type Output = Matrix<T, M, N>;
